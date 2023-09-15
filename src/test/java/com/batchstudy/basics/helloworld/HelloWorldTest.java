@@ -1,4 +1,4 @@
-package com.batchstudy;
+package com.batchstudy.basics.helloworld;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
@@ -14,8 +14,8 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Map;
 
-@SpringBootTest(classes = BatchStudyApplicationTests.TestConfig.class)
-class BatchStudyApplicationTests {
+@SpringBootTest(classes = HelloWorldTest.TestConfig.class)
+public class HelloWorldTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
@@ -57,5 +57,4 @@ class BatchStudyApplicationTests {
             return new JobLauncherTestUtils();
         }
     }
-
 }
