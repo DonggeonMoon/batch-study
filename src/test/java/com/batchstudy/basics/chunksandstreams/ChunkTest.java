@@ -33,8 +33,8 @@ public class ChunkTest {
     void runJob() throws Exception {
         {
             JobParameters emptyJobParameters = new JobParametersBuilder()
-                    .addParameter("inputPath", new JobParameter("classpath:files/_A/input.json"))
-                    .addParameter("outputPath", new JobParameter("output/myOutput.json"))
+                    .addParameter("inputPath", new JobParameter("classpath:files/_A/chunkTest.json"))
+                    .addParameter("outputPath", new JobParameter("output/chunkOutput.json"))
                     .toJobParameters();
 
             JobExecution jobExecution = jobLauncherTestUtils.launchJob(emptyJobParameters);
@@ -72,28 +72,31 @@ public class ChunkTest {
         }
         @Bean
         public Step step() {
-            return stepBuilderFactory.get("readJsonStep")
+            return stepBuilderFactory.get("jsonItemReader")
                     .repository(jobRepository)
-                    .<InputData, OutputData>chunk(1)
+                    .<ChunkTestInputData, ChunkTestOutputData>chunk(4)
                     .reader(jsonItemReader(null))
                     .processor(processor())
                     .writer(writer(null))
                     .build();
         }
 
-        private ItemProcessor<InputData, OutputData> processor() {
-            return inputData -> {
-                OutputData outputData = new OutputData();
-                outputData.outputValue = inputData.value.toUpperCase();
+        private ItemProcessor<ChunkTestInputData, ChunkTestOutputData> processor() {
+            return item -> {
+                ChunkTestOutputData outputData = new ChunkTestOutputData();
+                if (item.value.equals("Six")) {
+                    throw new RuntimeException("Simulate error");
+                }
+                outputData.outputValue = item.value.toUpperCase();
                 return outputData;
             };
         }
 
         @Bean
         @StepScope
-        public JsonFileItemWriter<OutputData> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
+        public JsonFileItemWriter<ChunkTestOutputData> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
             FileSystemResource outputResource = new FileSystemResource(outputPath);
-            return new JsonFileItemWriterBuilder<OutputData>()
+            return new JsonFileItemWriterBuilder<ChunkTestOutputData>()
                     .jsonObjectMarshaller(new JacksonJsonObjectMarshaller<>())
                     .resource(outputResource)
                     .name("jsonItemWriter")
@@ -102,7 +105,7 @@ public class ChunkTest {
 
         @Bean
         @StepScope
-        public JsonItemReader<InputData> jsonItemReader(@Value("#{jobParameters['inputPath']}") String inputPath) {
+        public JsonItemReader<ChunkTestInputData> jsonItemReader(@Value("#{jobParameters['inputPath']}") String inputPath) {
             File file;
 
             try {
@@ -111,8 +114,8 @@ public class ChunkTest {
                 throw new IllegalArgumentException(e);
             }
 
-            return new JsonItemReaderBuilder<InputData>()
-                    .jsonObjectReader(new JacksonJsonObjectReader<>(InputData.class))
+            return new JsonItemReaderBuilder<ChunkTestInputData>()
+                    .jsonObjectReader(new JacksonJsonObjectReader<>(ChunkTestInputData.class))
                     .resource(new FileSystemResource(file))
                     .name("JsonItemReader")
                     .build();
@@ -128,7 +131,7 @@ public class ChunkTest {
                         '}';
             }
         }
-        public static class InputData {
+        public static class ChunkTestInputData {
             public String value;
 
             @Override
@@ -139,7 +142,7 @@ public class ChunkTest {
             }
         }
 
-        public static class OutputData {
+        public static class ChunkTestOutputData {
             public String outputValue;
 
             @Override
