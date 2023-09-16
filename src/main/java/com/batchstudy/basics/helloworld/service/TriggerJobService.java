@@ -1,4 +1,4 @@
-package com.example.batchstudy.service;
+package com.batchstudy.basics.helloworld.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.*;

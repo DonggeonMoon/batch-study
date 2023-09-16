@@ -1,4 +1,4 @@
-package com.example.batchstudy.annotation;
+package com.batchstudy.basics.helloworld.annotation;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 

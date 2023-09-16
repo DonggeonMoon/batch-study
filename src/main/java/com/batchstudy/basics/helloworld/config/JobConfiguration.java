@@ -1,6 +1,6 @@
-package com.example.batchstudy.config;
+package com.batchstudy.basics.helloworld.config;
 
-import com.example.batchstudy.annotation.MyJob;
+import com.batchstudy.basics.helloworld.annotation.MyJob;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
