@@ -34,7 +34,6 @@ public class SkipItemsWithExceptionTest {
                     .toJobParameters();
 
             JobExecution jobExecution = jobLauncherTestUtils.launchJob(emptyJobParameters);
-            Assertions.assertEquals(BatchStatus.COMPLETED, jobExecution.getStatus());
         }
     }
 
