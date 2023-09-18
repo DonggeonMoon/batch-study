@@ -1,6 +1,7 @@
-package com.batchstudy.listeners;
+package com.batchstudy.listeners.jobexecutionlistenersimple;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 
@@ -15,5 +16,6 @@ public class SimpleJobListener implements JobExecutionListener {
     @Override
     public void afterJob(JobExecution jobExecution) {
         log.info("Job {} ended with status {}", jobExecution.getJobId(), jobExecution.getStatus());
+        jobExecution.setExitStatus(new ExitStatus("COMPLETED", "custom description"));
     }
 }

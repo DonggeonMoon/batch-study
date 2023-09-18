@@ -1,38 +1,36 @@
-package com.batchstudy.listeners;
+package com.batchstudy.listeners.listenerwithannotations;
 
+import com.batchstudy.testutils.CourseUtilBatchTestConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@SpringBootTest(classes = JobExecutionerListenerTest.TestConfig.class)
-public class JobExecutionerListenerTest {
+@SpringBootTest(classes = {AnnotationListenerTest.TestConfig.class,
+        CourseUtilBatchTestConfig.class, ListenerWithAnnotations.class, ReaderWithBeforeAndAfterStep.class
+})
+public class AnnotationListenerTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
-    @Autowired
-    private JobRepository jobRepository;
-
     @Test
     void test() throws Exception {
-        JobExecution jobExecution = jobLauncherTestUtils.launchJob(new JobParameters());
-        assertThat(jobExecution.getExitStatus()).isEqualTo("custom description");
+        JobParameters jobParameters = new JobParametersBuilder()
+                .toJobParameters();
+        jobLauncherTestUtils.launchJob(jobParameters);
     }
 
     @Configuration
     @EnableBatchProcessing
+    @Slf4j
     static class TestConfig {
         @Autowired
         private JobBuilderFactory jobBuilderFactory;
@@ -40,17 +38,24 @@ public class JobExecutionerListenerTest {
         @Autowired
         private StepBuilderFactory stepBuilderFactory;
 
+        @Autowired
+        private ReaderWithBeforeAndAfterStep readerWithBeforeAndAfterStep;
+
+        @Autowired
+        private ListenerWithAnnotations listenerWithAnnotations;
+
         @Bean
-        public Job executionListenerJob() {
-            Step step = stepBuilderFactory.get("executionListenerStep")
-                    .tasklet((stepContribution, chunkContext) ->
-                            RepeatStatus.FINISHED)
+        public Job annotationListenerTest() {
+            Step step = stepBuilderFactory.get("step")
+                    .chunk(2)
+                    .reader(readerWithBeforeAndAfterStep)
+                    .writer(items -> {
+
+                    })
+                    .listener(listenerWithAnnotations)
                     .build();
-
-            return jobBuilderFactory.get("myJob")
-
+            return jobBuilderFactory.get("job")
                     .start(step)
-                    .listener(new SimpleJobListener())
                     .build();
         }
 
