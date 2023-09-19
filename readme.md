@@ -14,10 +14,23 @@
 
 ## 스프링 배치 구성요소들
 * Job
+  * 수행하고자 하는 작업을 나타내며, 배치 처리 과정의 단위가 되는 인터페이스
+* JobParameters
+  * Job 인스턴스에 전달되는 매개변수들이며, Job을 구분한다. 따라서, JobParameter들이 같으면 같은 작업으로 간주되며, 실행 시 예외가 발생한다. 
 * Step
+  * Job의 순차적인 단계를 구성하는 인터페이스. Job은 하나 이상의 Step을 가진다.
+* JobRepository
+  * Job을 실행하기 위한 정보를 저장하기 위해 필요한 유틸리티 클래스
+* JobLauncher
+  * Job 실행을 시작하기 위한 인터페이스
+* JobLauncherTestUtils
+  * 배치 Job들을 테스트하는 것을 도와주는 유틸리티 클래스
 * ItemReader
 * ItemProcessor
 * ItemWriter
+
+## @EnableBachProcessing
+사용 시 JobRepository, JobBuilderFactory, StepBuilderFactory 등 스프링 배치 실행에 필요한 빈 및 설정을 제공해줌
 
 ## 표준 스코프 순서
 1. Job 생성
