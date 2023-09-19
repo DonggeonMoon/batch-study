@@ -1,5 +1,6 @@
 package com.batchstudy.projectone.config;
 
+import com.batchstudy.projectone.FileHandlingJobExecutionListener;
 import com.batchstudy.projectone.model.Person;
 import com.batchstudy.projectone.utils.CourseUtils;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +30,11 @@ public class JobConfiguration {
     private final StepBuilderFactory stepBuilderFactory;
 
     @Bean
-    public Job job() {
+    public Job job(FileHandlingJobExecutionListener listener) {
         return jobBuilderFactory.get("anonymizeJob")
                 .start(step())
+                .listener(listener)
+                .validator(new AnonymizeJobParameterValidator())
                 .build();
     }
 
@@ -40,14 +43,14 @@ public class JobConfiguration {
         return stepBuilderFactory.get("anonymizeStep")
                 .<Person, Person>chunk(1)
                 .reader(reader(null))
-                .processor(processor())
+                .processor(processor(null))
                 .writer(writer(null))
                 .build();
     }
 
     @Bean
     @StepScope
-    public JsonItemReader<Person> reader(@Value("#{jobParameters['inputPath']}") String inputPath) {
+    public JsonItemReader<Person> reader(@Value(AnonymizeJobParameterKeys.INPUT_PATH_REFERENCE) String inputPath) {
         FileSystemResource resource = CourseUtils.getFileResource(inputPath);
 
         return new JsonItemReaderBuilder<Person>()
@@ -58,18 +61,26 @@ public class JobConfiguration {
     }
 
     @Bean
-    public ItemProcessor<Person, Person> processor() {
+    @StepScope
+    public ItemProcessor<Person, Person> processor(@Value(AnonymizeJobParameterKeys.ANONYMIZED_DATA_REFERENCE)
+                                                   String anonymize) {
         return input -> {
             if (!input.isCustomer()) {
                 return null;
             }
-            return Person.from(input);
+            Person output = Person.from(input);
+            if (anonymize != null && anonymize.equals("true")) {
+                output.setEmail("");
+                output.setName("John Doe");
+            }
+
+            return output;
         };
     }
 
     @Bean
     @StepScope
-    public JsonFileItemWriter<Person> writer(@Value("#{jobParameters['outputPath']}") String outputPath) {
+    public JsonFileItemWriter<Person> writer(@Value(AnonymizeJobParameterKeys.OUTPUT_PATH_REFERENCE) String outputPath) {
         FileSystemResource resource = CourseUtils.getFileResource(outputPath);
 
         return new JsonFileItemWriterBuilder<Person>()
