@@ -21,7 +21,7 @@ public class JobConfiguration2 {
 
     @Bean
     public Job otherJob() {
-        Step step = stepBuilderFactory.get("step")
+        Step step = stepBuilderFactory.get("requestAdioStep")
                 .tasklet((contribution, chunkContext) -> {
                     Map<String, Object> jobParameters = chunkContext.getStepContext().getJobParameters();
                     Object outputText = jobParameters.get("outputText");

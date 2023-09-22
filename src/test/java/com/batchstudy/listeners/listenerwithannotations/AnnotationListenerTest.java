@@ -46,7 +46,7 @@ public class AnnotationListenerTest {
 
         @Bean
         public Job annotationListenerTest() {
-            Step step = stepBuilderFactory.get("step")
+            Step step = stepBuilderFactory.get("requestAdioStep")
                     .chunk(2)
                     .reader(readerWithBeforeAndAfterStep)
                     .writer(items -> {

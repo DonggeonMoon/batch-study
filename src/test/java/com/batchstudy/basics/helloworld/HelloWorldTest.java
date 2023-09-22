@@ -39,7 +39,7 @@ public class HelloWorldTest {
 
         @Bean
         public Job helloWorldJob() {
-            Step step = stepBuilderFactory.get("step")
+            Step step = stepBuilderFactory.get("requestAdioStep")
                     .tasklet((contribution, chunkContext) -> {
                         Map<String, Object> jobParameters = chunkContext.getStepContext().getJobParameters();
                         Object outputText = jobParameters.get("outputText");
