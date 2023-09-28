@@ -1,6 +1,5 @@
 package com.batchstudy.basics.helloworld.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;

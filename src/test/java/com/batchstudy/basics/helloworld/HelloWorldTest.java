@@ -25,7 +25,7 @@ public class HelloWorldTest {
                 .addParameter("outputText", new JobParameter("Hello Spring Batch"))
                 .toJobParameters();
 
-        jobLauncherTestUtils.launchJob();
+        jobLauncherTestUtils.launchJob(jobParameters);
     }
 
     @Configuration
@@ -39,7 +39,7 @@ public class HelloWorldTest {
 
         @Bean
         public Job helloWorldJob() {
-            Step step = stepBuilderFactory.get("requestAdioStep")
+            Step step = stepBuilderFactory.get("step")
                     .tasklet((contribution, chunkContext) -> {
                         Map<String, Object> jobParameters = chunkContext.getStepContext().getJobParameters();
                         Object outputText = jobParameters.get("outputText");
