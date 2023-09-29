@@ -1,5 +1,6 @@
 package com.batchstudy.basics.readwriteprocess;
 
+import com.batchstudy.testutils.CourseUtilBatchTestConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
@@ -24,7 +25,7 @@ import org.springframework.util.ResourceUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-@SpringBootTest(classes = ItemWriterTest.TestConfig.class)
+@SpringBootTest(classes = {ItemWriterTest.TestConfig.class, CourseUtilBatchTestConfig.class})
 public class ItemWriterTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -56,7 +57,6 @@ public class ItemWriterTest {
 
         @Bean
         public Step readerStep() {
-
             return stepBuilderFactory.get("readJsonStep")
                     .<InputAndOutputData, InputAndOutputData>chunk(1).reader(reader())
                     .processor(new PassThroughItemProcessor<>())
@@ -65,19 +65,8 @@ public class ItemWriterTest {
         }
 
         @Bean
-        public JsonFileItemWriter<InputAndOutputData> writer() {
-            FileSystemResource outputResource = new FileSystemResource("output/output.json");
-            return new JsonFileItemWriterBuilder<InputAndOutputData>()
-                    .jsonObjectMarshaller(new JacksonJsonObjectMarshaller<>())
-                    .resource(outputResource)
-                    .name("jsonItemWriter")
-                    .build();
-        }
-
-        @Bean
         public JsonItemReader<InputAndOutputData> reader() {
             File file;
-
             try {
                 file = ResourceUtils.getFile("classpath:files/_A/input.json");
             } catch (FileNotFoundException e) {
@@ -91,6 +80,16 @@ public class ItemWriterTest {
                     .build();
         }
 
+        @Bean
+        public JsonFileItemWriter<InputAndOutputData> writer() {
+            FileSystemResource outputResource = new FileSystemResource("output/output.json");
+            return new JsonFileItemWriterBuilder<InputAndOutputData>()
+                    .jsonObjectMarshaller(new JacksonJsonObjectMarshaller<>())
+                    .resource(outputResource)
+                    .name("jsonItemWriter")
+                    .build();
+        }
+
         public static class InputAndOutputData {
             public String value;
 
@@ -100,11 +99,6 @@ public class ItemWriterTest {
                         "value='" + value + '\'' +
                         '}';
             }
-        }
-
-        @Bean
-        public JobLauncherTestUtils utils() {
-            return new JobLauncherTestUtils();
         }
     }
 }

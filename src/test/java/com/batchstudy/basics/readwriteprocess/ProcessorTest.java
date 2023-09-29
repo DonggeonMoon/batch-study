@@ -1,5 +1,6 @@
 package com.batchstudy.basics.readwriteprocess;
 
+import com.batchstudy.testutils.CourseUtilBatchTestConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.*;
@@ -13,7 +14,6 @@ import org.springframework.batch.item.json.JsonFileItemWriter;
 import org.springframework.batch.item.json.JsonItemReader;
 import org.springframework.batch.item.json.builder.JsonFileItemWriterBuilder;
 import org.springframework.batch.item.json.builder.JsonItemReaderBuilder;
-import org.springframework.batch.item.support.PassThroughItemProcessor;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,7 +26,7 @@ import org.springframework.util.ResourceUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-@SpringBootTest(classes = ProcessorTest.TestConfig.class)
+@SpringBootTest(classes = {ProcessorTest.TestConfig.class, CourseUtilBatchTestConfig.class})
 public class ProcessorTest {
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -66,6 +66,23 @@ public class ProcessorTest {
                     .build();
         }
 
+        @Bean
+        public JsonItemReader<InputData> reader() {
+            File file;
+
+            try {
+                file = ResourceUtils.getFile("classpath:files/_A/input.json");
+            } catch (FileNotFoundException e) {
+                throw new IllegalArgumentException(e);
+            }
+
+            return new JsonItemReaderBuilder<InputData>()
+                    .jsonObjectReader(new JacksonJsonObjectReader<>(InputData.class))
+                    .resource(new FileSystemResource(file))
+                    .name("JsonItemReader")
+                    .build();
+        }
+
         private ItemProcessor<InputData, OutputData> processor() {
             return inputData -> {
                 OutputData outputData = new OutputData();
@@ -84,33 +101,6 @@ public class ProcessorTest {
                     .build();
         }
 
-        @Bean
-        public JsonItemReader<InputData> reader() {
-            File file;
-
-            try {
-                file = ResourceUtils.getFile("classpath:files/_A/input.json");
-            } catch (FileNotFoundException e) {
-                throw new IllegalArgumentException(e);
-            }
-
-            return new JsonItemReaderBuilder<InputData>()
-                    .jsonObjectReader(new JacksonJsonObjectReader<>(InputData.class))
-                    .resource(new FileSystemResource(file))
-                    .name("JsonItemReader")
-                    .build();
-        }
-
-        public static class InputAndOutputData {
-            public String value;
-
-            @Override
-            public String toString() {
-                return "InputAndOutputData{" +
-                        "value='" + value + '\'' +
-                        '}';
-            }
-        }
         public static class InputData {
             public String value;
 
@@ -131,11 +121,6 @@ public class ProcessorTest {
                         "outputValue='" + outputValue + '\'' +
                         '}';
             }
-        }
-
-        @Bean
-        public JobLauncherTestUtils utils() {
-            return new JobLauncherTestUtils();
         }
     }
 }
