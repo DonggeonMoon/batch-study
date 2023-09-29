@@ -39,6 +39,16 @@
 ## @EnableBachProcessing
 사용 시 JobRepository, JobBuilderFactory, StepBuilderFactory 등 스프링 배치 실행에 필요한 빈 및 설정을 제공해줌
 
+## ItemReader, ItemProcessor, ItemWriter
+본 프로젝트 내에서는 JSON 파일을 읽고 쓰는 작업을 수행하였으므로 JsonItemReader과 JsonFileItemWriter를 사용하였음
+* JsonItemReader<T>
+  * JacksonJsonObjectReader라는 ObjectReader에 매핑을 위임함
+* ItemProcessor<I, O>
+  * I라는 타입을 처리하여 O 타입으로 반환함
+* JsonFileItemWriter<T>
+  * JacksonJsonObjectMarshaller라는 ObjectMarshaller에 마샬링을 위임함
+
+
 ## 표준 스코프 순서
 1. Job 생성
 2. Reader 생성 
